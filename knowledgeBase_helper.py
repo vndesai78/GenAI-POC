@@ -5,7 +5,7 @@ from botocore.client import Config
 pp = pprint.PrettyPrinter(indent=2)
 
 bedrock_config = Config(connect_timeout=120, read_timeout=120, retries={'max_attempts': 0})
-bedrock_client = boto3.client('bedrock-runtime')
+bedrock_client = boto3.client('bedrock-runtime', region_name='us-east-1')
 bedrock_agent_client = boto3.client("bedrock-agent-runtime",config=bedrock_config)
 #bedrock_agent_client.synch()
 
