@@ -102,8 +102,8 @@ def get_response_llm(llm,vectorstore_faiss,query):
 def uploadFileToS3(file, bucket, s3_file):
     s3 = boto3.client('s3',
                       region_name='us-east-1',
-                      aws_access_key_id='AKIARXGX6HCNDEZ62HF4',
-                      aws_secret_access_key='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')
+                      aws_access_key_id='FILTEREDCONTENT',
+                      aws_secret_access_key='FILTEREDCONTENT')
     
     try:
         #s3.upload_file(file, bucket, s3_file)
