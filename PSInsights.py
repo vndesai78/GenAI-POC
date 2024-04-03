@@ -24,8 +24,8 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
 
 ## Bedrock Clients
-bedrock=boto3.client(service_name="bedrock-runtime")
-bedrock_embeddings=BedrockEmbeddings(model_id="amazon.titan-embed-text-v1",client=bedrock)
+bedrock=boto3.client(service_name="bedrock-runtime", region_name='us-east-1')
+bedrock_embeddings=BedrockEmbeddings(model_id="amazon.titan-embed-text-v1",client=bedrock, region_name='us-east-1')
 
 
 ## Data ingestion
