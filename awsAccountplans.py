@@ -28,8 +28,8 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
 
 ## Bedrock Clients
-bedrock=boto3.client(service_name="bedrock-runtime", region_name='us-east-1')
-bedrock_embeddings=BedrockEmbeddings(model_id="amazon.titan-embed-text-v1",client=bedrock, region_name='us-east-1')
+bedrock=boto3.client(service_name="bedrock-runtime",region_name='us-east-1')
+bedrock_embeddings=BedrockEmbeddings(model_id="amazon.titan-embed-text-v1",client=bedrock,region_name='us-east-1')
 kb_id = "JIKY1KUYAK" # replace it with the Knowledge base id.
 
 
@@ -119,6 +119,19 @@ def uploadFileToS3(file, bucket, s3_file):
         st.error('File not found.' + file)
         return False     
 
+def putFileToS3(file, bucket, s3_file):
+    s3 = boto3.client('s3',
+                      region_name='us-east-1')
+    try:
+        s3.put_object(Body=file,Bucket=bucket,Key=s3_file)
+        #st.write(file)
+        st.success('File Successfully Uploaded')
+        return True
+    except FileNotFoundError:
+        #time.sleep(9)
+        st.error('File not found.' + file)
+        return False     
+    
 def main():
     #st.set_page_config("ChatBot - Account Plan Insights! 🤖")
     
@@ -145,6 +158,7 @@ def main():
                 #data = uploaded_pdf.getvalue().read()
                 #bytes_data = uploaded_pdf.getvalue()
                 #st.write(bytes_data)
+                data = BytesIO(uploaded_pdf.getvalue()).read()
                 pdf_text = ""
 
                 for page in pdf_reader.pages :
@@ -162,7 +176,8 @@ def main():
                     with st.spinner('Uploading...'):
                         #st.caption("TBD!!")
                         #with open(uploaded_pdf.name, "rb") as data:
-                        uploadFileToS3(pdf_text,'2024-accountplans-repo',uploaded_pdf.name)
+                        #ploadFileToS3(pdf_text,'2024-accountplans-repo',uploaded_pdf.name)
+                        putFileToS3(data,'2024-accountplans-repo',uploaded_pdf.name)
 
         #if st.button("Vectors Update"):
          #      docs = data_ingestion()

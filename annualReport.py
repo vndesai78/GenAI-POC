@@ -28,8 +28,8 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import RetrievalQA
 
 ## Bedrock Clients
-bedrock=boto3.client(service_name="bedrock-runtime", region_name='us-east-1')
-bedrock_embeddings=BedrockEmbeddings(model_id="amazon.titan-embed-text-v1",client=bedrock, region_name='us-east-1')
+bedrock=boto3.client(service_name="bedrock-runtime",region_name='us-east-1')
+bedrock_embeddings=BedrockEmbeddings(model_id="amazon.titan-embed-text-v1",client=bedrock,region_name='us-east-1')
 kb_id = "RZGU5XTEWI" # replace it with the Knowledge base id.
 
 
@@ -102,7 +102,6 @@ def get_response_llm(llm,vectorstore_faiss,query):
 def uploadFileToS3(file, bucket, s3_file):
     s3 = boto3.client('s3',
                       region_name='us-east-1')
-    
     try:
         #s3.upload_file(file, bucket, s3_file)
         #st.write(file)
@@ -112,6 +111,19 @@ def uploadFileToS3(file, bucket, s3_file):
         #s3.put_object()
         #s3.upload_fileobj(file1,bucket,s3_file)
         s3.upload_file('temp.pdf', bucket, s3_file)
+        st.success('File Successfully Uploaded')
+        return True
+    except FileNotFoundError:
+        #time.sleep(9)
+        st.error('File not found.' + file)
+        return False     
+
+def putFileToS3(file, bucket, s3_file):
+    s3 = boto3.client('s3',
+                      region_name='us-east-1')
+    try:
+        s3.put_object(Body=file,Bucket=bucket,Key=s3_file)
+        #st.write(file)
         st.success('File Successfully Uploaded')
         return True
     except FileNotFoundError:
@@ -150,13 +162,14 @@ def main():
             else:
                 st.success(uploaded_pdf.name + ' Selected')
                 pdf_reader = PdfReader(uploaded_pdf)
-                #data = uploaded_pdf.getvalue().read()
-                #bytes_data = uploaded_pdf.getvalue()
+                data = BytesIO(uploaded_pdf.getvalue()).read()
+                #bytes_data = StringIO(uploaded_pdf.getvalue()).encode('UTF-8')
                 #st.write(bytes_data)
                 pdf_text = ""
 
                 for page in pdf_reader.pages :
                     pdf_text += page.extract_text()
+                    
                 # To convert to a string based IO:
                 #stringio = StringIO(uploaded_pdf.getvalue().decode("latin-1"))
                 #stringio = BytesIO(uploaded_pdf.getvalue().decode("latin-1"))
@@ -170,7 +183,17 @@ def main():
                     with st.spinner('Uploading...'):
                         #st.caption("TBD!!")
                         #with open(uploaded_pdf.name, "rb") as data:
-                        uploadFileToS3(pdf_text,'tml-genai-poc-annual-reports/Tata Motors/',uploaded_pdf.name)
+                        if genre == '***Tata Motors***' : 
+                            subfolder = 'Tata Motors'
+                        if genre == '***Mahindra***' : 
+                            subfolder = 'Mahindra'
+                        if genre == '***Ashok Layland***' : 
+                            subfolder = 'Ashok Layland'
+
+                        bucket_path = "tml-genai-poc-annual-reports" 
+                        file_path= subfolder + "/" + uploaded_pdf.name
+                        #uploadFileToS3(pdf_text,bucket_path,file_path)
+                        putFileToS3(data,bucket_path,file_path)
 
         #if st.button("Vectors Update"):
          #      docs = data_ingestion()
